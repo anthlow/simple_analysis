@@ -1,4 +1,5 @@
 SETUP VIRTUAL ENVIRONMENT (In Backend Directory)
+>> cd backend/
 >> python3 -m venv venv (create)
 >> source venv/bin/activate (activate)
 >> deactivate
