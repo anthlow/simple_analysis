@@ -10,7 +10,7 @@ INSTALL REQUIREMENTS
 
 CREATE .ENVIRONMENT
 - in backend directory, create .env file
-    - FINNHUB_API_KEY=YOUR_API_KEY
+    - ALPHAVANTAGE_API_KEY=YOUR_API_KEY
 
 RUN BACKEND
 >> uvicorn main:app --reload

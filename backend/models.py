@@ -1,9 +1,11 @@
 from pydantic import BaseModel
+from datetime import datetime
 
 class StockQuote(BaseModel):
+    date: datetime
     symbol: str
-    current_price: float
     high: float
     low: float
     open: float
-    previous_close: float
+    close: float
+    volume: int

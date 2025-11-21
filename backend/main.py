@@ -1,8 +1,11 @@
 from fastapi import FastAPI, HTTPException
 from models import StockQuote
-import finnhub
+from alpha_vantage.timeseries import TimeSeries
 from dotenv import load_dotenv
 import os
+from datetime import datetime
+from typing import List
+from fastapi.responses import Response
 
 # Load .env File
 load_dotenv()
@@ -10,24 +13,40 @@ load_dotenv()
 # Initialize FastAPI
 app = FastAPI()
 
-# Setup client
-finnhub_client = finnhub.Client(os.getenv("FINNHUB_API_KEY"))
+# Setup Alpha Vantage Client
+ts = TimeSeries(key = os.getenv("ALPHAVANTAGE_API_KEY"), output_format='json')
+
+# Favicon Error Mute
+@app.get("/favicon.ico")
+def favicon():
+    return Response(status_code=204)
 
 # Get Stock Info
-@app.get('/stock/{symbol}', response_model=StockQuote)
+@app.get('/stock/{symbol}', response_model=List[StockQuote])
 def get_stock(symbol: str):
-    raw_data = finnhub_client.quote(symbol.upper())
+    try:
+        data, meta_data = ts.get_daily(symbol=symbol.upper(), outputsize='full')
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
-    if raw_data["c"] == 0:
-        raise HTTPException(status_code=404, detail="Ticker not found.")
-    
-    clean_data = StockQuote(
-        symbol=symbol.upper(),
-        current_price=raw_data["c"],
-        high=raw_data["h"],
-        low=raw_data["l"],
-        open=raw_data["o"],
-        previous_close=raw_data["pc"]
-    )
+    # Filter for current year (YTD)
+    current_year = str(datetime.now().year)
+    ytd_data = {date: vals for date, vals in data.items() if date.startswith(current_year)}
 
-    return clean_data
+    # Sort dates ascending
+    sorted_dates = sorted(ytd_data.keys())
+
+    result = []
+    for date in sorted_dates:
+        day_data = ytd_data[date]
+        result.append(StockQuote(
+            date=date,
+            symbol= symbol,
+            high=float(day_data['2. high']),
+            low=float(day_data['3. low']),
+            open=float(day_data['1. open']),
+            close=float(day_data['4. close']),
+            volume=int(day_data['5. volume'])
+        ))
+
+    return result
