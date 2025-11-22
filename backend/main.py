@@ -25,7 +25,7 @@ def favicon():
 @app.get('/stock/{symbol}', response_model=List[StockQuote])
 def get_stock(symbol: str):
     try:
-        data, meta_data = ts.get_daily(symbol=symbol.upper(), outputsize='full')
+        data, meta_data = ts.get_daily(symbol=symbol.upper(), outputsize='compact')
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
