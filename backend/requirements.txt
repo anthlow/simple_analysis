@@ -3,3 +3,4 @@ uvicorn
 pydantic
 python-dotenv
 alpha_vantage
+fastapi[all]

@@ -6,12 +6,22 @@ import os
 from datetime import datetime
 from typing import List
 from fastapi.responses import Response
+from fastapi.middleware.cors import CORSMiddleware
 
 # Load .env File
 load_dotenv()
 
 # Initialize FastAPI
 app = FastAPI()
+
+# Setup CORS Middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],   # allow all for dev
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Setup Alpha Vantage Client
 ts = TimeSeries(key = os.getenv("ALPHAVANTAGE_API_KEY"), output_format='json')
